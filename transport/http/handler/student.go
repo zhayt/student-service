@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/labstack/echo/v4"
 	"github.com/zhayt/student-service/model"
+	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -14,11 +15,13 @@ func (h *Handler) SingIn(e echo.Context) error {
 	var studentDTO model.StudentDTO
 
 	if err := e.Bind(&studentDTO); err != nil {
+		h.l.Error("Bind error", zap.Error(err))
 		return e.JSON(http.StatusBadRequest, errorResponse{Message: "Bind error"})
 	}
 
 	student, err := h.service.Student.GetStudentByEmail(ctx, studentDTO)
 	if err != nil {
+		h.l.Error("GetStudentByEmail error", zap.Error(err))
 		return e.JSON(http.StatusBadRequest, errorResponse{Message: "Get student error"})
 	}
 

@@ -32,6 +32,8 @@ func (r *StudentStorage) CreateStudent(ctx context.Context, student model.Studen
 func (r *StudentStorage) GetStudentByEmail(ctx context.Context, studentEmail string) (model.Student, error) {
 	qr := `SELECT * FROM student WHERE email = $1`
 
+	r.l.Info("Try get data by email", zap.String("email", studentEmail))
+
 	var student model.Student
 
 	if err := r.db.GetContext(ctx, &student, qr, studentEmail); err != nil {

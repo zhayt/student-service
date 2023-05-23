@@ -13,7 +13,7 @@ func (h *Handler) ShowProfile(e echo.Context) error {
 
 	studentName := e.Param("name")
 
-	studentProfile, err := h.service.PersonalInfo.GetStudentAllProfileData(ctx, studentName)
+	studentProfile, err := h.service.Profile.GetStudentAllProfileData(ctx, studentName)
 	if err != nil {
 		return e.JSON(http.StatusNotFound, errorResponse{Message: "GetStudentAllProfileData error"})
 	}
@@ -31,7 +31,7 @@ func (h *Handler) UpdateProfile(e echo.Context) error {
 		return e.JSON(http.StatusBadRequest, errorResponse{Message: "Bind error"})
 	}
 
-	if err := h.service.PersonalInfo.CreateOrUpdateStudentInfo(ctx, studentInfo); err != nil {
+	if err := h.service.Profile.CreateOrUpdateStudentInfo(ctx, studentInfo); err != nil {
 		return e.JSON(http.StatusInternalServerError, errorResponse{Message: "CreateOrUpdateStudentInfo error"})
 	}
 

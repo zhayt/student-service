@@ -3,6 +3,7 @@ package postgre
 import (
 	"context"
 	"fmt"
+	_ "github.com/jackc/pgx/stdlib"
 	"github.com/jmoiron/sqlx"
 	"github.com/zhayt/student-service/config"
 	"time"
