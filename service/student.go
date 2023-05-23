@@ -36,7 +36,7 @@ func (s *StudentService) CreateStudent(ctx context.Context, student model.Studen
 }
 
 func (s *StudentService) GetStudentByEmail(ctx context.Context, studentDTO model.StudentDTO) (model.Student, error) {
-	student, err := s.storage.Student.GetStudentByEmail(ctx, studentDTO.Password)
+	student, err := s.storage.Student.GetStudentByEmail(ctx, studentDTO.Email)
 	if err != nil {
 		return model.Student{}, err
 	}
