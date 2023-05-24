@@ -24,10 +24,15 @@ type IImageStorage interface {
 	DeleteImageByStudentID(ctx context.Context, studentID int) error
 }
 
+type IGenderStorage interface {
+	GetAllGenders(ctx context.Context) ([]*model.Gender, error)
+}
+
 type Storage struct {
 	Student IStudentStorage
 	Profile IStudentProfileStorage
 	Image   IImageStorage
+	Gender  IGenderStorage
 }
 
 func NewStorage(cfg *config.Config, l *zap.Logger) (*Storage, error) {
@@ -40,6 +45,7 @@ func NewStorage(cfg *config.Config, l *zap.Logger) (*Storage, error) {
 		Student: postgre.NewStudentStorage(db, l),
 		Profile: postgre.NewStudentProfileStorage(db, l),
 		Image:   postgre.NewImageStorage(db, l),
+		Gender:  postgre.NewGenderStorage(db, l),
 	}
 
 	return store, nil
