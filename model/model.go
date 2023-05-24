@@ -58,6 +58,7 @@ type StudentProfileDTO struct {
 	PersonalInfo     StudentPersonalInfoDTO `json:"personalInfo"`
 	ImageType        bool                   `json:"imageType"`
 	Image            Image                  `json:"image"`
+	Gender           []*Gender              `json:"gender"`
 }
 
 type JsonBirthDate time.Time
