@@ -15,12 +15,12 @@ type IStudentStorage interface {
 
 type IStudentProfileStorage interface {
 	CreateOrUpdateStudentPersonalInfo(ctx context.Context, studentInfo model.StudentPersonalInfo) error
-	GetStudentProfileData(ctx context.Context, studentName string) (model.StudentProfileDTO, error)
+	GetStudentPersonalInfoByName(ctx context.Context, studentName string) (model.StudentPersonalInfoDTO, error)
 }
 
 type IImageStorage interface {
-	CreateImage(ctx context.Context, image model.Image) (int, error)
-	UpdateImage(ctx context.Context, image model.Image) error
+	GetImageByStudentName(ctx context.Context, studentName string) (model.Image, error)
+	CreateOrUpdateImage(ctx context.Context, image model.Image) error
 	DeleteImageByStudentID(ctx context.Context, studentID int) error
 }
 

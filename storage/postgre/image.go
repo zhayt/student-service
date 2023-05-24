@@ -17,23 +17,32 @@ func NewImageStorage(db *sqlx.DB, l *zap.Logger) *ImageStorage {
 	return &ImageStorage{db: db, l: l}
 }
 
-func (r *ImageStorage) CreateImage(ctx context.Context, image model.Image) (int, error) {
-	qr := `INSERT INTO image(student_id, image_url) VALUES ($1, $2) RETURNING id`
+func (r *ImageStorage) GetImageByStudentName(ctx context.Context, studentName string) (model.Image, error) {
+	qr := `SELECT image.id, image.student_id, image.image_url
+			FROM image
+			INNER JOIN student ON student.id = image.student_id
+			WHERE student.name = $1`
 
-	var imageID int
+	var image model.Image
 
-	if err := r.db.GetContext(ctx, &imageID, qr, image.StudentID, image.ImageURL); err != nil {
-		return 0, fmt.Errorf("couldn't crreate image: %w", err)
+	if err := r.db.GetContext(ctx, &image, qr, studentName); err != nil {
+		return model.Image{}, fmt.Errorf("couldn't get image: %w", err)
 	}
 
-	return imageID, nil
+	return image, nil
 }
 
-func (r *ImageStorage) UpdateImage(ctx context.Context, image model.Image) error {
-	qr := `UPDATE image SET image_url = $1 WHERE student_id = $2`
+func (r *ImageStorage) CreateOrUpdateImage(ctx context.Context, image model.Image) error {
+	qr := `INSERT INTO image (student_id, image_url) 
+			VALUES ($1, $2)
+			ON CONFLICT (student_id)
+			DO UPDATE 
+			    SET image_url = EXCLUDED.image_url`
 
-	if _, err := r.db.ExecContext(ctx, qr, image.ImageURL, image.StudentID); err != nil {
-		return fmt.Errorf("couldn't update image: %w", err)
+	r.l.Info("Try to create or update image", zap.Any("imageObj", image))
+
+	if _, err := r.db.ExecContext(ctx, qr, image.StudentID, image.ImageURL); err != nil {
+		return fmt.Errorf("couldn't create or update image: %w", err)
 	}
 
 	return nil

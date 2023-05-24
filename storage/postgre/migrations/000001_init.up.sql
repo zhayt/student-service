@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS image
     student_id integer NOT NULL,
     image_url character varying NOT NULL,
     PRIMARY KEY (id),
+    CONSTRAINT unique_student_id UNIQUE (student_id),
     CONSTRAINT fk_student_id FOREIGN KEY (student_id)
         REFERENCES student (id) MATCH SIMPLE
         ON UPDATE NO ACTION
@@ -51,6 +52,7 @@ CREATE TABLE IF NOT EXISTS student_personal_info
     city character varying NOT NULL,
     birthday_date timestamp without time zone NOT NULL,
     phone_number character varying NOT NULL,
+    CONSTRAINT unique_student_id UNIQUE (student_id),
     CONSTRAINT fk_student_id FOREIGN KEY (student_id)
         REFERENCES student (id) MATCH SIMPLE
         ON UPDATE CASCADE

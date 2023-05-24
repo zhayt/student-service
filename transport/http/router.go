@@ -7,6 +7,9 @@ func (s *Server) SetUpRoute() {
 
 	student.POST("/sign-in", s.handler.SingIn)
 	student.POST("/sign-up", s.handler.SignUp)
-	student.GET("/profile/{name}", s.handler.ShowProfile)
+	student.GET("/profile/:name", s.handler.ShowProfile)
 	student.PUT("/profile", s.handler.UpdateProfile)
+
+	student.PUT("/image", s.handler.CreateOrUpdateImage)
+	student.DELETE("/image/:studentID", s.handler.DeleteImage)
 }

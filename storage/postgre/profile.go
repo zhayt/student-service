@@ -6,6 +6,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/zhayt/student-service/model"
 	"go.uber.org/zap"
+	"time"
 )
 
 type StudentProfileStorage struct {
@@ -17,23 +18,21 @@ func NewStudentProfileStorage(db *sqlx.DB, l *zap.Logger) *StudentProfileStorage
 	return &StudentProfileStorage{db: db, l: l}
 }
 
-func (r *StudentProfileStorage) GetStudentProfileData(ctx context.Context, studentName string) (model.StudentProfileDTO, error) {
-	qr := `SELECT sp.full_name, i.image_url, sp.about_student, g.name, sp.country, sp.region, sp.city, sp.birthday_date,
-			sp.phone_number
-			FROM 
-             student s
-             INNER JOIN student_personal_info sp ON s.id = sp.student_id
-             INNER JOIN image i USING(student_id)
-             INNER JOIN gender g ON g.id = sp.gender_id
-             WHERE s.name = $1`
+func (r *StudentProfileStorage) GetStudentPersonalInfoByName(ctx context.Context, studentName string) (model.StudentPersonalInfoDTO, error) {
+	qr := `SELECT full_name, about_student, g.name, country, region, city, birthday_date, phone_number
+			FROM student
+			INNER JOIN student_personal_info spi ON student.id = spi.student_id
+			INNER JOIN gender g ON spi.gender_id = g.id
+			WHERE student.name = $1
+			`
 
-	var studentProfile model.StudentProfileDTO
+	var personalInfo model.StudentPersonalInfoDTO
 
-	if err := r.db.GetContext(ctx, &studentProfile, qr, studentName); err != nil {
-		return model.StudentProfileDTO{}, fmt.Errorf("couldn't get student profile data: %w", err)
+	if err := r.db.GetContext(ctx, &personalInfo, qr, studentName); err != nil {
+		return model.StudentPersonalInfoDTO{}, fmt.Errorf("couldn't get student personal info: %w", err)
 	}
 
-	return studentProfile, nil
+	return personalInfo, nil
 }
 
 func (r *StudentProfileStorage) CreateOrUpdateStudentPersonalInfo(ctx context.Context, studentInfo model.StudentPersonalInfo) error {
@@ -54,7 +53,7 @@ func (r *StudentProfileStorage) CreateOrUpdateStudentPersonalInfo(ctx context.Co
 
 	if _, err := r.db.ExecContext(ctx, qr,
 		studentInfo.StudentID, studentInfo.GenderID, studentInfo.FullName, studentInfo.AboutStudent, studentInfo.Country,
-		studentInfo.Region, studentInfo.City, studentInfo.BirthdayDate, studentInfo.PhoneNumber); err != nil {
+		studentInfo.Region, studentInfo.City, time.Time(studentInfo.BirthdayDate), studentInfo.PhoneNumber); err != nil {
 		return fmt.Errorf("couldn't create or update student personal info: %w", err)
 	}
 

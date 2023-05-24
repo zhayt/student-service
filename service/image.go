@@ -8,8 +8,7 @@ import (
 )
 
 type IImageService interface {
-	CreateImage(ctx context.Context, image model.Image) (int, error)
-	UpdateImage(ctx context.Context, image model.Image) error
+	CreateOrUpdateImage(ctx context.Context, image model.Image) error
 	DeleteImage(ctx context.Context, studentID int) error
 }
 
@@ -22,12 +21,8 @@ func NewImageService(storage *storage.Storage, l *zap.Logger) *ImageService {
 	return &ImageService{storage: storage, l: l}
 }
 
-func (s *ImageService) CreateImage(ctx context.Context, image model.Image) (int, error) {
-	return s.storage.Image.CreateImage(ctx, image)
-}
-
-func (s *ImageService) UpdateImage(ctx context.Context, image model.Image) error {
-	return s.UpdateImage(ctx, image)
+func (s *ImageService) CreateOrUpdateImage(ctx context.Context, image model.Image) error {
+	return s.storage.Image.CreateOrUpdateImage(ctx, image)
 }
 
 func (s *ImageService) DeleteImage(ctx context.Context, studentID int) error {

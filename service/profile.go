@@ -5,11 +5,12 @@ import (
 	"github.com/zhayt/student-service/model"
 	"github.com/zhayt/student-service/storage"
 	"go.uber.org/zap"
+	"sync"
 )
 
 type IStudentProfileService interface {
 	CreateOrUpdateStudentInfo(ctx context.Context, studentInfo model.StudentPersonalInfo) error
-	GetStudentAllProfileData(ctx context.Context, studentName string) (model.StudentProfileDTO, error)
+	GetStudentAllProfileData(ctx context.Context, studentName string) *model.StudentProfileDTO
 }
 
 type StudentProfileService struct {
@@ -21,9 +22,41 @@ func NewStudentProfileService(storage *storage.Storage, l *zap.Logger) *StudentP
 	return &StudentProfileService{storage: storage, l: l}
 }
 
-func (s *StudentProfileService) GetStudentAllProfileData(ctx context.Context, studentName string) (model.StudentProfileDTO, error) {
+func (s *StudentProfileService) GetStudentAllProfileData(ctx context.Context, studentName string) *model.StudentProfileDTO {
 
-	return s.storage.Profile.GetStudentProfileData(ctx, studentName)
+	profileDate := &model.StudentProfileDTO{}
+
+	var wg sync.WaitGroup
+
+	wg.Add(2)
+
+	go func() {
+		personalInfo, err := s.storage.Profile.GetStudentPersonalInfoByName(ctx, studentName)
+		if err != nil {
+			s.l.Error("GetStudentPersonalInfoByName error", zap.Error(err))
+			profileDate.PersonalInfoType = false
+		} else {
+			profileDate.PersonalInfoType = true
+			profileDate.PersonalInfo = personalInfo
+		}
+		wg.Done()
+	}()
+
+	go func() {
+		image, err := s.storage.Image.GetImageByStudentName(ctx, studentName)
+		if err != nil {
+			s.l.Error("GetImageByStudentName error", zap.Error(err))
+			profileDate.ImageType = false
+		} else {
+			profileDate.ImageType = true
+			profileDate.Image = image
+		}
+		wg.Done()
+	}()
+
+	wg.Wait()
+
+	return profileDate
 }
 
 func (s *StudentProfileService) CreateOrUpdateStudentInfo(ctx context.Context, studentInfo model.StudentPersonalInfo) error {
