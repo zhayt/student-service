@@ -28,8 +28,7 @@ func (s *StudentProfileService) GetStudentAllProfileData(ctx context.Context, st
 
 	var wg sync.WaitGroup
 
-	wg.Add(2)
-
+	wg.Add(1)
 	go func() {
 		personalInfo, err := s.storage.Profile.GetStudentPersonalInfoByName(ctx, studentName)
 		if err != nil {
@@ -42,6 +41,7 @@ func (s *StudentProfileService) GetStudentAllProfileData(ctx context.Context, st
 		wg.Done()
 	}()
 
+	wg.Add(1)
 	go func() {
 		image, err := s.storage.Image.GetImageByStudentName(ctx, studentName)
 		if err != nil {
@@ -51,6 +51,17 @@ func (s *StudentProfileService) GetStudentAllProfileData(ctx context.Context, st
 			profileDate.ImageType = true
 			profileDate.Image = image
 		}
+		wg.Done()
+	}()
+
+	wg.Add(1)
+	go func() {
+		gender, err := s.storage.Gender.GetAllGenders(ctx)
+		if err != nil {
+			s.l.Error("GetAllGenders error", zap.Error(err))
+		}
+
+		profileDate.Gender = gender
 		wg.Done()
 	}()
 
